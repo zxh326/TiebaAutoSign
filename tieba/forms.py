@@ -27,28 +27,30 @@ class RegisterForm(forms.ModelForm):
 
 class LoginForm(forms.Form):
     username = forms.CharField(
-        required=True,
         label=u"用户名",
         error_messages={'required': u'请输入用户名'},
         widget=forms.TextInput(
             attrs={
-                'class': 'mdl-textfield__input',
-                'placeholder': "用户名",
+                'class': 'validate',
+                # 'placeholder': "用户名",
+                'type':'text',
             }
         ),
     )
+
     password = forms.CharField(
         required=True,
         label=u"密码",
         error_messages={'required': u'请输入密码'},
         widget=forms.PasswordInput(
             attrs={
-                'class': 'mdl-textfield__input',
-                'placeholder': "密码",
-                'type': 'password',
+                'class': 'validate',
+                # 'placeholder': "密码",
+                # 'type': 'password',
             }
         ),
     )
+
 
     def clean(self):
         if not self.is_valid():

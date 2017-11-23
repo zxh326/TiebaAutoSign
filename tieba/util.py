@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 import random
 import hashlib
 import requests
+from multiprocessing import Process
 from bs4 import BeautifulSoup as bf
-
+from tests import tmp
 baidu_spider_ua = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) \
                    AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 \
                    Mobile/13B143 Safari/601.1 (compatible; \
@@ -43,7 +45,7 @@ def _get_tbs(bduss):
     return s.json()['tbs']
 
 
-def do_sign(bduss, fid, tiename):
+def do_sign(tbs, bduss, fid, tiename):
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
         'User-Agent': 'Fucking iPhone/1.0 BadApple/99.1',
@@ -62,7 +64,7 @@ def do_sign(bduss, fid, tiename):
         'fid': fid,
         'kw': tiename,
         'net_type': '3',
-        'tbs': _get_tbs(bduss)
+        'tbs': tbs
     }
 
     hashstr = ''
@@ -85,3 +87,13 @@ def do_sign(bduss, fid, tiename):
                         headers=headers, cookies=cookies, data=datas)
 
     return (res.json())
+
+
+def sign_user(tbs,bduss,fid, tiename):
+    do_sign(tbs, bduss, fid, tiename)
+
+bduss = tmp['bduss']
+list = get_tieba_list(bduss)
+tbs = _get_tbs(bduss)
+for _x in list:
+    print (sign_user(tbs,bduss,_x[0],_x[1]))
