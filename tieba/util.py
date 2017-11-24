@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
+import re
 import random
 import hashlib
 import requests
-from multiprocessing import Process
+from .tests import tmp
 from bs4 import BeautifulSoup as bf
-from tests import tmp
 baidu_spider_ua = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) \
                    AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 \
                    Mobile/13B143 Safari/601.1 (compatible; \
@@ -14,14 +14,19 @@ baidu_spider_ua = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) \
 
 def get_tieba_list(bduss):
     tiebas = []
+    result = {}
     s = requests.Session()
     data = s.get('https://tieba.baidu.com/?page=like',
                  headers={'User-Agent': baidu_spider_ua},
                  cookies={'BDUSS': bduss})
+
     soup = bf(data.text, 'lxml')
     ties = soup.find_all('li', class_=['forumTile forumTile_withLevel'])
     # print (soup)
-
+    try:
+        uname = re.findall(".*uname: \"(.*?)\"",str(soup.select('body > script')))[0]
+    except :
+        uname = 'null'
     for t in ties:
         tmplist = []
         tmp = t.select('a')[0].attrs
@@ -30,12 +35,13 @@ def get_tieba_list(bduss):
         tmplist.append(fid)
         tmplist.append(titile)
         tiebas.append(tmplist)
-
     # print (tiebas)
-    return tiebas
+    result['tiebas'] = tiebas
+    result['uname'] = uname
+    return result
 
 
-def _get_tbs(bduss):
+def get_tbs(bduss):
     s = requests.get('http://tieba.baidu.com/dc/common/tbs',
                      headers={'User-Agent': 'fuck phone',
                               'Referer': 'http://tieba.baidu.com/',
@@ -74,9 +80,9 @@ def do_sign(tbs, bduss, fid, tiename):
     for i in datakeys:
         hashstr += str(i) + '=' + str(datas[i])
 
-    # error_code 0 正常           => 成功
-    # error_code 160002 重复      => 成功
-    # error_code * 失败           => 失败
+    # error_code 0            => Success
+    # error_code 16023        => Success
+    # error_code *            => Faild
 
     sign = hashlib.md5(hashstr.encode('utf-8') +
                        keys.encode('utf-8')).hexdigest().upper()
@@ -89,11 +95,6 @@ def do_sign(tbs, bduss, fid, tiename):
     return (res.json())
 
 
-def sign_user(tbs,bduss,fid, tiename):
-    do_sign(tbs, bduss, fid, tiename)
 
-bduss = tmp['bduss']
-list = get_tieba_list(bduss)
-tbs = _get_tbs(bduss)
-for _x in list:
-    print (sign_user(tbs,bduss,_x[0],_x[1]))
+
+

@@ -3,8 +3,10 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, HttpResponse
 from django.contrib.auth.models import User
 from django.contrib import messages
+from .util import get_tieba_list
 from .models import *
 from .forms import *
+from .do import doo
 # Create your views here.
 
 
@@ -85,3 +87,53 @@ def edit_view(request):
                   'tieba/edit.html',
                   {'user_form': user_form,
                    'profile_form': profile_form})
+
+
+def update_user_bduss(request):
+    if request.method == 'POST':
+        profile_form = ProfileEditForm(instance=request.user.userprofile,
+                                       data=request.POST)
+        if profile_form.is_valid():
+            profile_form.save()
+            if add_user_tieba(request.user.id):
+                messages.success(request, 'Success')
+            else:
+                messages.success(request, 'Bduss 无效')
+        else:
+            messages.error(request, '信息更新失败')
+    else:
+        profile_form = ProfileEditForm(instance=request.user.userprofile)
+    return render(request,
+                  'tieba/edit.html',
+                  {'profile_form': profile_form})
+
+
+def add_user_tieba(user_id):
+    this_user = UserProfile.objects.get(user_id=user_id)
+    print(this_user.bduss)
+    user_tiebas = get_tieba_list(this_user.bduss)
+    if user_tiebas['uname'] == 'null' or user_tiebas['uname'] == '':
+        return False
+    else:
+        this_user.user.first_name = user_tiebas['uname']
+        this_user.user.save()
+        # 第一次获取
+        to_save_list = []
+
+        for _i in user_tiebas['tiebas']:
+            one_tieba = TiebaList(
+                fid=_i[0], tiebaname=_i[1], user_id=user_id)
+            to_save_list.append(one_tieba)
+
+        TiebaList.objects.bulk_create(to_save_list)
+
+        return True
+
+
+def update_user_tieba(user_id):
+    pass
+
+
+def test(request):
+    doo()
+    return HttpResponse('1')
