@@ -29,6 +29,8 @@ def do_sign_user(user_id):
         # print(to_sign_tieba.tiebaname)
         info = do_sign(user_tbs, user_bduss, to_sign_tieba.fid,
                        to_sign_tieba.tiebaname)
+
+        print (info)
         error_code = info['error_code']
         to_sign_tieba.error_code = error_code
 
@@ -40,7 +42,7 @@ def do_sign_user(user_id):
             340011 => 成功
             340006 => 失败/（贴吧被封忽略）
         """
-        if error_code == '0' or error_code == '160002' or error_code == '340011':
+        if error_code == '0' or error_code == '160002' or error_code == '340011' or error_code == '340006':
             if error_code == '0':
                 to_sign_tieba.error_msg = 'success'
             else:
