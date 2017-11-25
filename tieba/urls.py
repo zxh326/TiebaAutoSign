@@ -6,5 +6,6 @@ urlpatterns = [
     url(r'reg/',views.register_view,name='reg'),
     url(r'edit/',views.update_user_bduss,name='edit'),
     url(r'logout',views.logout_view,name='logout'),
-    url(r'test/',views.test),
+    url(r'detail/(?P<pk>[a-zA-Z0-9]+)/$',views.test),
+    url(r'detail/$',views.test)
 ]

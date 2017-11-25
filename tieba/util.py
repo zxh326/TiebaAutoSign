@@ -29,15 +29,15 @@ def get_tieba_list(bduss):
         uname = 'null'
     for t in ties:
         tmplist = []
-        tmp = t.select('a')[0].attrs
-        fid = tmp['data-fid']
-        titile = tmp['data-start-app-param']
+        tmp     = t.select('a')[0].attrs
+        fid     = tmp['data-fid']
+        titile  = tmp['data-start-app-param']
         tmplist.append(fid)
         tmplist.append(titile)
         tiebas.append(tmplist)
     # print (tiebas)
     result['tiebas'] = tiebas
-    result['uname'] = uname
+    result['uname']  = uname
     return result
 
 
@@ -54,23 +54,23 @@ def get_tbs(bduss):
 def do_sign(tbs, bduss, fid, tiename):
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': 'Fucking iPhone/1.0 BadApple/99.1',
+        'User-Agent'  : 'Fucking iPhone/1.0 BadApple/99.1',
     }
     cookies = {
         'BDUSS': bduss,
     }
     datas = {
-        'BDUSS': bduss,
-        '_client_id': '03-00-DA-59-05-00-72-96-06-00-01-00-\
-                       04-00-4C-43-01-00-34-F4-02-00-BC-25-\
-                       09-00-4E-36',
-        '_client_type': '4',
+        'BDUSS'          : bduss,
+        '_client_id'     : '03-00-DA-59-05-00-72-96-06-00-01-00-\
+                            04-00-4C-43-01-00-34-F4-02-00-BC-25-\
+                            09-00-4E-36',
+        '_client_type'   : '4',
         '_client_version': '1.2.1.17',
-        '_phone_imei': '540b43b59d21b7a4824e1fd31b08e9a6',
-        'fid': fid,
-        'kw': tiename,
-        'net_type': '3',
-        'tbs': tbs
+        '_phone_imei'    : '540b43b59d21b7a4824e1fd31b08e9a6',
+        'fid'            : fid,
+        'kw'             : tiename,
+        'net_type'       : '3',
+        'tbs'            : tbs
     }
 
     hashstr = ''

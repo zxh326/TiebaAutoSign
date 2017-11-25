@@ -128,9 +128,9 @@ def add_user_tieba(user_id):
 def update_user_tieba(user_id):
     pass
 
-def test(request):
+def test(request,pk = 0):
     doo()
-    return HttpResponse('1')
+    return HttpResponse(pk)
 
 def status_view(request):
     pass
