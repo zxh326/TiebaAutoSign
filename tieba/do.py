@@ -1,3 +1,19 @@
+# -*- coding: utf-8 -*-
+"""
+-------------------------------------------------
+   File Name：     do.py  
+   Description :  
+   date：          2017/11/21
+-------------------------------------------------
+   Change Activity:
+                   2017/12/01: 
+-------------------------------------------------
+    TODO：
+        每次签到的用户数量优化【急】
+        logger处理
+-------------------------------------------------       
+"""
+
 from django.db.models import Q
 from datetime import datetime
 from .models import UserProfile
@@ -17,7 +33,6 @@ def thread_sign(user_tbs, user_bduss, tiebas):
         error_code = info['error_code']
         to_sign_tieba.error_code = error_code
 
-        # 没有消息就是最好的消息
         """error_code
             0      => 成功
             160002 => 成功
@@ -35,7 +50,7 @@ def thread_sign(user_tbs, user_bduss, tiebas):
             to_sign_tieba.error_msg = info['error_msg']
 
         to_sign_tieba.save()
-    # print ()
+    print ()
 
 
 def do_sign_user(user_id):
@@ -51,24 +66,18 @@ def do_sign_user(user_id):
     to_sign_tiebas = TiebaList.objects.filter(
         Q(user_id=user_id), Q(is_sign__lt=datetime.now()))
 
-    if len(to_sign_tiebas) == 0:
+    len_tiebas = len(to_sign_tiebas)
+
+    if len_tiebas == 0:
         return res_code
 
     user_bduss = UserProfile.objects.get(user_id=user_id).bduss
     user_tbs = get_tbs(user_bduss)
 
-    splist = lambda l: [l[i:i + 20] for i in range(len(l)) if i % 20 == 0]
+    splist = lambda l: [l[i:i + (len_tiebas // 10 + 1) ] for i in range(len(l)) if i % (len_tiebas // 10 + 1) == 0]
 
-    # print (len(splist(to_sign_tiebas)))
-    # for to_sign_tieba in to_sign_tiebas:
-    #     # print(to_sign_tieba.tiebaname)
-    #     info = do_sign(user_tbs, user_bduss, to_sign_tieba.fid,
-    #                    to_sign_tieba.tiebaname)
-
-    #     print (info)
     Threads = list()
     for Tmps in splist(to_sign_tiebas):
-        # print (Tmps)
         Threads.append(Thread(target=thread_sign,
                        args=(user_tbs, user_bduss, Tmps)))
     for t in Threads:
@@ -82,8 +91,11 @@ def do_sign_user(user_id):
 def doo():
     """
         进程池 pool > 5 
-        todo 用户过多 过滤 标记用户
+        todo 用户过多 | 过滤 | 标记用户  
     """
+    # with Pool(3) as p:
+    #     p.map()
+    #     pass
 
     all_users = UserProfile.objects.filter(~Q(bduss='null'))
 

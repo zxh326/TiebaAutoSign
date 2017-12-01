@@ -1,16 +1,27 @@
 # -*- coding: utf-8 -*-
+"""
+-------------------------------------------------
+   File Name：     util.py  
+   Description :  
+   date：          2017/11/19
+-------------------------------------------------
+   Change Activity:
+                   2017/12/01: 
+-------------------------------------------------
+    TODO：
+        速度优化
+-------------------------------------------------       
+"""
 import re
 import random
 import hashlib
 import requests
-from .tests import tmp
 from bs4 import BeautifulSoup as bf
 baidu_spider_ua = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) \
                    AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 \
                    Mobile/13B143 Safari/601.1 (compatible; \
                    Baiduspider-render/2.0; \
                    +http://www.baidu.com/search/spider.html)'
-
 
 def get_tieba_list(bduss):
     tiebas = []
@@ -93,8 +104,3 @@ def do_sign(tbs, bduss, fid, tiename):
                         headers=headers, cookies=cookies, data=datas)
 
     return (res.json())
-
-
-
-
-
