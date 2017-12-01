@@ -30,6 +30,7 @@ def register_view(request):
         user_form = RegisterForm()
     return render(request, 'tieba/register.html', {'form': user_form})
 
+
 def login_view(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
@@ -60,9 +61,11 @@ def login_view(request):
 
         return render(request, 'tieba/login.html', context=context)
 
+
 def logout_view(request):
     logout(request)
     return render(request, 'tieba/index.html')
+
 
 @login_required(login_url='/login')
 def edit_view(request):
@@ -85,6 +88,7 @@ def edit_view(request):
                   {'user_form': user_form,
                    'profile_form': profile_form})
 
+
 @login_required(login_url='/login')
 def update_user_bduss(request):
     if request.method == 'POST':
@@ -104,7 +108,11 @@ def update_user_bduss(request):
                   'tieba/edit.html',
                   {'profile_form': profile_form})
 
+
 def add_user_tieba(user_id):
+    """
+        TODO：增量更新 pass
+    """
     this_user = UserProfile.objects.get(user_id=user_id)
     print(this_user.bduss)
     user_tiebas = get_tieba_list(this_user.bduss)
@@ -117,32 +125,41 @@ def add_user_tieba(user_id):
         to_save_list = []
 
         for _i in user_tiebas['tiebas']:
-            one_tieba = TiebaList(
-                fid=_i[0], tiebaname=_i[1], user_id=user_id, )
-            to_save_list.append(one_tieba)
+            if (len(TiebaList.objects.filter(fid=_i[0], user_id=user_id))) == 0:         # 批量更新
+                one_tieba = TiebaList(fid=_i[0],
+                                      tiebaname=_i[1],
+                                      user_id=user_id,)
+                to_save_list.append(one_tieba)
 
-        TiebaList.objects.bulk_create(to_save_list)
+        TiebaList.objects.bulk_create(to_save_list)                                      # 批量录入数据库
 
         return True
+
 
 def update_user_tieba(user_id):
     pass
 
-def test(request,pk = 0):
+
+def test(request, pk=0):
     doo()
     return HttpResponse(pk)
+
 
 def status_view(request):
     pass
 
+
 def all_status_view(request):
     pass
+
 
 def system_setting_view(request):
     pass
 
+
 def person_setting_view(request):
     pass
+
 
 def user_manager_view(request):
     pass

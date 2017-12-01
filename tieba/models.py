@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User,UserManager
 from django.db.models.signals import post_save
-
+from datetime import datetime,timedelta
 # Create your models here.
 class UserProfile(models.Model):
     user        = models.OneToOneField(User)
@@ -17,13 +17,13 @@ class UserProfile(models.Model):
     def __unicode__(self):
         return self.user.username
 
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        profile      = UserProfile()
-        profile.user = instance
-        profile.save()
+    def create_user_profile(sender, instance, created, **kwargs):
+        if created:
+            profile = UserProfile()
+            profile.user = instance
+            profile.save()
 
-post_save.connect(create_user_profile, sender=User)
+    post_save.connect(create_user_profile, sender=User)
 
 class TiebaList(models.Model):
     fid        = models.IntegerField()
@@ -31,4 +31,4 @@ class TiebaList(models.Model):
     user       = models.ForeignKey(User, models.DO_NOTHING)
     error_code = models.IntegerField(blank=True, null=True)
     error_msg  = models.CharField(max_length=100, blank=True, null=True)
-    is_sign    = models.DateField(blank=True, null=True)
+    is_sign    = models.DateField(blank=True, null=True,default=datetime.now()-timedelta(1))
