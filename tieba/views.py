@@ -117,6 +117,8 @@ def add_user_tieba(user_id):
     print(this_user.bduss)
     user_tiebas = get_tieba_list(this_user.bduss)
     if user_tiebas['uname'] == 'null' or user_tiebas['uname'] == '':
+        this_user.bduss = 'null'
+        this_user.save()
         return False
     else:
         this_user.user.first_name = user_tiebas['uname']
@@ -125,7 +127,7 @@ def add_user_tieba(user_id):
         to_save_list = []
 
         for _i in user_tiebas['tiebas']:
-            if (len(TiebaList.objects.filter(fid=_i[0], user_id=user_id))) == 0:         # 批量更新
+            if (len(TiebaList.objects.filter(fid=_i[0], user_id=user_id))) == 0:         # 增量更新
                 one_tieba = TiebaList(fid=_i[0],
                                       tiebaname=_i[1],
                                       user_id=user_id,)
