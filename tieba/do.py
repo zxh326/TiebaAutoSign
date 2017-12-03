@@ -25,40 +25,40 @@ from threading import Thread
 
 def thread_sign(user_tbs, user_bduss, tiebas,i):
     for to_sign_tieba in tiebas:
-        print ("thread{}".format(i),to_sign_tieba.fid,to_sign_tieba.tiebaname)
-        # info = do_sign(user_tbs, user_bduss, to_sign_tieba.fid,
-        #                to_sign_tieba.tiebaname)
+        # print ("thread{}".format(i),to_sign_tieba.fid,to_sign_tieba.tiebaname)
+        info = do_sign(user_tbs, user_bduss, to_sign_tieba.fid,
+                       to_sign_tieba.tiebaname)
 
-        # print(info)
-        # error_code = info['error_code']
-        # to_sign_tieba.error_code = error_code
+        print('thread {}'.format(i),info)
+        error_code = info['error_code']
+        to_sign_tieba.error_code = error_code
 
-        # """error_code
-        #     0      => 成功
-        #     160002 => 成功
-        #     340011 => 成功
-        #     340006 => 失败/（贴吧被封忽略）
-        # """
-        # if error_code == '0' or error_code == '160002' or error_code == '340011' or error_code == '340006':
-        #     if error_code == '0':
-        #         to_sign_tieba.error_msg = 'success'
-        #     else:
-        #         to_sign_tieba.error_msg = info['error_msg']
-        #     to_sign_tieba.is_sign = datetime.now()
-        # else:
-        #     res_code = 1
-        #     to_sign_tieba.error_msg = info['error_msg']
+        """error_code
+            0      => 成功
+            160002 => 成功
+            340011 => 成功
+            340006 => 失败/（贴吧被封忽略）
+        """
+        if error_code == '0' or error_code == '160002' or error_code == '340011' or error_code == '340006':
+            if error_code == '0':
+                to_sign_tieba.error_msg = 'success'
+            else:
+                to_sign_tieba.error_msg = info['error_msg']
+            to_sign_tieba.is_sign = datetime.now()
+        else:
+            res_code = 1
+            to_sign_tieba.error_msg = info['error_msg']
 
-        # to_sign_tieba.save()
+        to_sign_tieba.save()
 
 
 def do_sign_user(user_id):
     res_code = 0
     to_sign_tiebas = TiebaList.objects.filter(
-        Q(user_id=user_id))[:200]
+        Q(user_id=user_id), Q(is_sign__lt=datetime.now()))[:200]
 
     len_tiebas = len(to_sign_tiebas)
-    print (len_tiebas)
+    # print (len_tiebas)
     if len_tiebas == 0:
         return res_code
 

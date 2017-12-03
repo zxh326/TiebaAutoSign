@@ -154,7 +154,7 @@ def do_sign(tbs, bduss, fid, tiename):
     # error_code *            => Faild
 
     datas['sign'] = gen_hash(datas)
-
+ 
     res = requests.post('http://c.tieba.baidu.com/c/c/forum/sign',
                         headers=headers, cookies=cookies, data=datas)
 
