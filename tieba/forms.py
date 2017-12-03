@@ -81,4 +81,7 @@ class UserEditForm(forms.ModelForm):
 class ProfileEditForm(forms.ModelForm):
     class Meta:
         model = UserProfile
-        fields = ('bduss',)
+        fields = ('bduss','bname')
+    def __init__(self, *args, **kwargs):
+        super(forms.ModelForm, self).__init__(*args,**kwargs)
+        self.fields['bname'].widget.attrs['readonly'] = True
