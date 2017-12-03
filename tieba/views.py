@@ -2,8 +2,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, HttpResponse
 from django.contrib.auth.models import User
+from django.http.request import QueryDict
 from django.contrib import messages
-from .util import get_tieba_list
+from .util import get_user_bname,get_user_tieba
 from .models import *
 from .forms import *
 from .do import doo
@@ -92,51 +93,47 @@ def edit_view(request):
 @login_required(login_url='/login')
 def update_user_bduss(request):
     if request.method == 'POST':
-        profile_form = ProfileEditForm(instance=request.user.userprofile,
-                                       data=request.POST)
-        if profile_form.is_valid():
-            profile_form.save()
-            if add_user_tieba(request.user.id):
-                messages.success(request, 'Success')
+        info = get_user_bname(request.POST['bduss'])
+        datas = {}
+        if info['status'] == 0:
+            datas['bduss'] = request.POST['bduss']
+            datas['bname'] = info['bname']
+            profile_form = ProfileEditForm(instance=request.user.userprofile,
+                                           data=datas)
+            if profile_form.is_valid():
+                profile_form.save()
             else:
-                messages.success(request, 'Bduss 无效')
+                messages.error(request, '信息更新失败')
         else:
-            messages.error(request, '信息更新失败')
+            profile_form = ProfileEditForm(instance=request.user.userprofile)
+            messages.success(request, 'Bduss 无效')
     else:
         profile_form = ProfileEditForm(instance=request.user.userprofile)
+    
     return render(request,
                   'tieba/edit.html',
                   {'profile_form': profile_form})
 
 
-def add_user_tieba(user_id):
+def add_user_tieba(request):
     """
         TODO：增量更新 pass
     """
-    this_user = UserProfile.objects.get(user_id=user_id)
+    print (request.user.id)
+    this_user = UserProfile.objects.get(user_id=request.user.id)
     print(this_user.bduss)
-    user_tiebas = get_tieba_list(this_user.bduss)
-    if user_tiebas['uname'] == 'null' or user_tiebas['uname'] == '':
-        this_user.bduss = 'null'
-        this_user.save()
-        return False
-    else:
-        this_user.user.first_name = user_tiebas['uname']
-        this_user.user.save()
-        # 第一次获取
-        to_save_list = []
+    user_tiebas = get_user_tieba(this_user.bduss,this_user.bname)
+    # 第一次获取
+    to_save_list = []
 
-        for _i in user_tiebas['tiebas']:
-            if (len(TiebaList.objects.filter(fid=_i[0], user_id=user_id))) == 0:         # 增量更新
-                one_tieba = TiebaList(fid=_i[0],
-                                      tiebaname=_i[1],
-                                      user_id=user_id,)
-                to_save_list.append(one_tieba)
-
-        TiebaList.objects.bulk_create(to_save_list)                                      # 批量录入数据库
-
-        return True
-
+    for _i in user_tiebas:
+        if (len(TiebaList.objects.filter(fid=_i[0], user_id=request.user.id))) == 0:         # 增量更新
+            one_tieba = TiebaList(fid=_i[0],
+                                  tiebaname=_i[1],
+                                  user_id=request.user.id,)
+            to_save_list.append(one_tieba)
+    print ('done')
+    TiebaList.objects.bulk_create(to_save_list)                                      # 批量录入数据库
 
 def update_user_tieba(user_id):
     pass
