@@ -23,51 +23,42 @@ from threading import Thread
 # from multiprocessing import Pool
 
 
-def thread_sign(user_tbs, user_bduss, tiebas):
+def thread_sign(user_tbs, user_bduss, tiebas,i):
     for to_sign_tieba in tiebas:
-        # print (to_sign_tieba.fid,to_sign_tieba.tiebaname)
-        info = do_sign(user_tbs, user_bduss, to_sign_tieba.fid,
-                       to_sign_tieba.tiebaname)
+        print ("thread{}".format(i),to_sign_tieba.fid,to_sign_tieba.tiebaname)
+        # info = do_sign(user_tbs, user_bduss, to_sign_tieba.fid,
+        #                to_sign_tieba.tiebaname)
 
-        print(info)
-        error_code = info['error_code']
-        to_sign_tieba.error_code = error_code
+        # print(info)
+        # error_code = info['error_code']
+        # to_sign_tieba.error_code = error_code
 
-        """error_code
-            0      => 成功
-            160002 => 成功
-            340011 => 成功
-            340006 => 失败/（贴吧被封忽略）
-        """
-        if error_code == '0' or error_code == '160002' or error_code == '340011' or error_code == '340006':
-            if error_code == '0':
-                to_sign_tieba.error_msg = 'success'
-            else:
-                to_sign_tieba.error_msg = info['error_msg']
-            to_sign_tieba.is_sign = datetime.now()
-        else:
-            res_code = 1
-            to_sign_tieba.error_msg = info['error_msg']
+        # """error_code
+        #     0      => 成功
+        #     160002 => 成功
+        #     340011 => 成功
+        #     340006 => 失败/（贴吧被封忽略）
+        # """
+        # if error_code == '0' or error_code == '160002' or error_code == '340011' or error_code == '340006':
+        #     if error_code == '0':
+        #         to_sign_tieba.error_msg = 'success'
+        #     else:
+        #         to_sign_tieba.error_msg = info['error_msg']
+        #     to_sign_tieba.is_sign = datetime.now()
+        # else:
+        #     res_code = 1
+        #     to_sign_tieba.error_msg = info['error_msg']
 
-        to_sign_tieba.save()
-    print ()
+        # to_sign_tieba.save()
 
 
 def do_sign_user(user_id):
-    """do_sign_user
-    params:
-        user_id
-    return:
-        res_code
-        0 done
-        1 部分失败
-    """
     res_code = 0
     to_sign_tiebas = TiebaList.objects.filter(
-        Q(user_id=user_id), Q(is_sign__lt=datetime.now()))
+        Q(user_id=user_id))[:200]
 
     len_tiebas = len(to_sign_tiebas)
-
+    print (len_tiebas)
     if len_tiebas == 0:
         return res_code
 
@@ -77,9 +68,12 @@ def do_sign_user(user_id):
     splist = lambda l: [l[i:i + (len_tiebas // 10 + 1) ] for i in range(len(l)) if i % (len_tiebas // 10 + 1) == 0]
 
     Threads = list()
+    i = 0
     for Tmps in splist(to_sign_tiebas):
         Threads.append(Thread(target=thread_sign,
-                       args=(user_tbs, user_bduss, Tmps)))
+                       args=(user_tbs, user_bduss, Tmps,i)))
+        i = i+ 1
+
     for t in Threads:
         t.start()
     for t in Threads:
