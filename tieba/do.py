@@ -6,10 +6,9 @@
    date：          2017/11/21
 -------------------------------------------------
    Change Activity:
-                   2017/12/01: 
+                   2017/12/04: 
 -------------------------------------------------
     TODO：
-        每次签到的用户数量优化【急】
         logger处理
 -------------------------------------------------       
 """
@@ -23,13 +22,13 @@ from threading import Thread
 # from multiprocessing import Pool
 
 
-def thread_sign(user_tbs, user_bduss, tiebas,i):
+def thread_sign(user_tbs, user_bduss, tiebas):
     for to_sign_tieba in tiebas:
         # print ("thread{}".format(i),to_sign_tieba.fid,to_sign_tieba.tiebaname)
         info = do_sign(user_tbs, user_bduss, to_sign_tieba.fid,
                        to_sign_tieba.tiebaname)
 
-        print('thread {}'.format(i),info)
+        print(info)
         error_code = info['error_code']
         to_sign_tieba.error_code = error_code
 
@@ -68,11 +67,9 @@ def do_sign_user(user_id):
     splist = lambda l: [l[i:i + (len_tiebas // 10 + 1) ] for i in range(len(l)) if i % (len_tiebas // 10 + 1) == 0]
 
     Threads = list()
-    i = 0
     for Tmps in splist(to_sign_tiebas):
         Threads.append(Thread(target=thread_sign,
-                       args=(user_tbs, user_bduss, Tmps,i)))
-        i = i+ 1
+                       args=(user_tbs, user_bduss, Tmps)))
 
     for t in Threads:
         t.start()
