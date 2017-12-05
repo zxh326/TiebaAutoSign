@@ -6,6 +6,7 @@ from datetime import datetime,timedelta
 class UserProfile(models.Model):
     user        = models.OneToOneField(User)
     bduss       = models.CharField(max_length=255,blank=True,null=True,default='null')
+    bname       = models.CharField(max_length=255,blank=True,null=True,default='null')
     level       = models.IntegerField(blank=True,default=1)
     tieba_count = models.IntegerField(blank=True,null=True)
     sign_sum    = models.IntegerField(blank=True,null=True)

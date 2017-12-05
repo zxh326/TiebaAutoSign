@@ -4,7 +4,7 @@ from django.shortcuts import render, HttpResponse
 from django.contrib.auth.models import User
 from django.http.request import QueryDict
 from django.contrib import messages
-from .util import get_user_bname,get_user_tieba
+from .util import get_user_bname, get_user_tieba
 from .models import *
 from .forms import *
 from .do import doo
@@ -109,7 +109,7 @@ def update_user_bduss(request):
             messages.success(request, 'Bduss 无效')
     else:
         profile_form = ProfileEditForm(instance=request.user.userprofile)
-    
+
     return render(request,
                   'tieba/edit.html',
                   {'profile_form': profile_form})
@@ -119,21 +119,28 @@ def add_user_tieba(request):
     """
         TODO：增量更新 pass
     """
-    print (request.user.id)
+    print(request.user.id)
     this_user = UserProfile.objects.get(user_id=request.user.id)
     print(this_user.bduss)
-    user_tiebas = get_user_tieba(this_user.bduss,this_user.bname)
+    user_tiebas = get_user_tieba(this_user.bduss, this_user.bname)
     # 第一次获取
     to_save_list = []
 
     for _i in user_tiebas:
-        if (len(TiebaList.objects.filter(fid=_i[0], user_id=request.user.id))) == 0:         # 增量更新
+        # 增量更新
+        if (len(TiebaList.objects.filter(fid=_i[0], user_id=request.user.id))) == 0:
             one_tieba = TiebaList(fid=_i[0],
                                   tiebaname=_i[1],
                                   user_id=request.user.id,)
             to_save_list.append(one_tieba)
-    print ('done')
-    TiebaList.objects.bulk_create(to_save_list)                                      # 批量录入数据库
+    print('done')
+    # 批量录入数据库
+    TiebaList.objects.bulk_create(to_save_list)
+def flush_all_tieba(request):
+    if not request.user.is_admin:
+        return HttpResponse(request,'gun')
+    else:
+        pass
 
 def update_user_tieba(user_id):
     pass
