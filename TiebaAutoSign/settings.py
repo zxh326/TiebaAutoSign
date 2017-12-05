@@ -25,7 +25,57 @@ SECRET_KEY = 'lqdqey&6jswkei0mtl4-_d3waexybb^dlwn!7689-cx1!$0s_e'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(message)s'
+        },
+    },
+    'handlers': {
+        'console':{
+            'level':'INFO',
+            'class':'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'request.log',
+            'formatter': 'verbose'
+        },
+        'email': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'include_html' : True,
+        },
+        'sign':{
+            'level':'INFO',
+            'class': 'logging.FileHandler',
+            'filename':'sign.log',
+            'format':'verbose'
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file', 'email'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'sign':{
+            'handlers': ['sign'],
+            'level': 'INFO',
+            'propagate': True,
+        }
+    },
+}
+
+CRONJOBS = [
+    ('* */2 * * *','zhihu.getdetail.getInfo','>>/tmp/juke.log'),
+]
+
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -37,6 +87,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_crontab',
     'tieba',
 ]
 
@@ -79,8 +130,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'tieba',
         'USER': 'root',
-        'PASSWORD': '.',
-        'HOST': '127.0.0.1',
+        'PASSWORD': '',
+        'HOST': '123...',
         'PORT': '3306',
     }
 }
