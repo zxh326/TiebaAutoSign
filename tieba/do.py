@@ -13,12 +13,15 @@
 -------------------------------------------------       
 """
 
-from django.db.models import Q
-from datetime import datetime
+import logging
 from .models import UserProfile
 from .models import TiebaList
 from .util import get_tbs, do_sign
+from django.db.models import Q
+from datetime import datetime
 from threading import Thread
+
+logger = logging.getLogger('sign')
 # from multiprocessing import Pool
 
 
@@ -28,7 +31,7 @@ def thread_sign(user_tbs, user_bduss, tiebas):
         info = do_sign(user_tbs, user_bduss, to_sign_tieba.fid,
                        to_sign_tieba.tiebaname)
 
-        print(info)
+        logger.info(info)
         error_code = info['error_code']
         to_sign_tieba.error_code = error_code
 
@@ -54,7 +57,7 @@ def thread_sign(user_tbs, user_bduss, tiebas):
 def do_sign_user(user_id):
     res_code = 0
     to_sign_tiebas = TiebaList.objects.filter(
-        Q(user_id=user_id), Q(is_sign__lt=datetime.now()))[:200]
+        Q(user_id=user_id), Q(is_sign__lt=datetime.now()))
 
     len_tiebas = len(to_sign_tiebas)
     # print (len_tiebas)
