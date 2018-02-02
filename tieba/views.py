@@ -1,18 +1,17 @@
+from .forms import *
+from .models import *
+from .util import get_bname, get_tiebas
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, HttpResponse
 from django.contrib.auth.models import User
 from django.http.request import QueryDict
 from django.contrib import messages
-from .util import get_user_bname, get_user_tieba
-from .models import *
-from .forms import *
-from .do import doo
 # Create your views here.
-
+UserProfile
 
 def index(request):
-    return render(request, 'tieba/index.html')
+    return render(request, 'base1.html',{'title':'demo'})
 
 
 def register_view(request):
@@ -93,7 +92,7 @@ def edit_view(request):
 @login_required(login_url='/login')
 def update_user_bduss(request):
     if request.method == 'POST':
-        info = get_user_bname(request.POST['bduss'])
+        info = get_bname(request.POST['bduss'])
         datas = {}
         if info['status'] == 0:
             datas['bduss'] = request.POST['bduss']
@@ -119,23 +118,32 @@ def add_user_tieba(request):
     """
         TODO：增量更新 pass
     """
-    print(request.user.id)
     this_user = UserProfile.objects.get(user_id=request.user.id)
-    print(this_user.bduss)
-    user_tiebas = get_user_tieba(this_user.bduss, this_user.bname)
-    # 第一次获取
-    to_save_list = []
 
-    for _i in user_tiebas:
-        # 增量更新
-        if (len(TiebaList.objects.filter(fid=_i[0], user_id=request.user.id))) == 0:
-            one_tieba = TiebaList(fid=_i[0],
-                                  tiebaname=_i[1],
-                                  user_id=request.user.id,)
-            to_save_list.append(one_tieba)
-    print('done')
-    # 批量录入数据库
+    user_tiebas = TiebaList.objects.filter(user_id=request.user.id)
+    user_tiebas = [str(i.fid) for i in user_tiebas]
+
+    # print (user_tiebas)
+
+    user_all_tiebas = get_tiebas(this_user.bduss, this_user.bname)
+
+    user_new_tiebas = []
+    to_save_list = []
+    for _i in user_all_tiebas:
+        if _i[0] not in user_tiebas:
+            user_new_tiebas.append(_i)
+
+    for _i in user_new_tiebas:
+        one_tieba = TiebaList(fid=_i[0],
+                              tiebaname=_i[1],
+                              user_id=request.user.id,)
+        to_save_list.append(one_tieba)
+
     TiebaList.objects.bulk_create(to_save_list)
+    
+    return HttpResponse('Update'+ str(len(user_new_tiebas)))
+
+
 def flush_all_tieba(request):
     if not request.user.is_admin:
         return HttpResponse(request,'gun')
@@ -144,11 +152,6 @@ def flush_all_tieba(request):
 
 def update_user_tieba(user_id):
     pass
-
-
-def test(request, pk=0):
-    doo()
-    return HttpResponse(pk)
 
 
 def status_view(request):

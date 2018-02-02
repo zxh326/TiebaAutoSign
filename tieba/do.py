@@ -9,7 +9,7 @@
                    2017/12/04: 
 -------------------------------------------------
     TODO：
-        logger处理
+        logger处理 / d
 -------------------------------------------------       
 """
 
@@ -41,7 +41,8 @@ def thread_sign(user_tbs, user_bduss, tiebas):
             340011 => 成功
             340006 => 失败/（贴吧被封忽略）
         """
-        if error_code == '0' or error_code == '160002' or error_code == '340011' or error_code == '340006':
+        error_code_list = ['0', '160002', '340011', '340006', ]
+        if error_code in error_code_list:
             if error_code == '0':
                 to_sign_tieba.error_msg = 'success'
             else:
@@ -67,12 +68,13 @@ def do_sign_user(user_id):
     user_bduss = UserProfile.objects.get(user_id=user_id).bduss
     user_tbs = get_tbs(user_bduss)
 
-    splist = lambda l: [l[i:i + (len_tiebas // 10 + 1) ] for i in range(len(l)) if i % (len_tiebas // 10 + 1) == 0]
+    def splist(l): return [l[i:i + (len_tiebas // 10 + 1)]
+                           for i in range(len(l)) if i % (len_tiebas // 10 + 1) == 0]
 
     Threads = list()
     for Tmps in splist(to_sign_tiebas):
         Threads.append(Thread(target=thread_sign,
-                       args=(user_tbs, user_bduss, Tmps)))
+                              args=(user_tbs, user_bduss, Tmps)))
 
     for t in Threads:
         t.start()
@@ -95,6 +97,6 @@ def doo():
 
     for tmp in all_users:
         do_sign_user(tmp.user_id)
+        logger.info('{} sign done'.format(tmp.user_id))
 
     # print('1')
-

@@ -30,7 +30,7 @@ normal_ua = 'Mozilla/5.0 (SymbianOS/9.3; Series60/3.2 NokiaE72-1/021.021; \
              Version/3.0 BrowserNG/7.1.16352'
 
 
-def get_user_bname(bduss):
+def get_bname(bduss):
     tiebas = []
     result = {}
     s = requests.Session()
@@ -38,10 +38,9 @@ def get_user_bname(bduss):
                  headers={'User-Agent': baidu_spider_ua},
                  cookies={'BDUSS': bduss})
 
-    soup = bf(data.text, 'lxml')
     try:
         bname = re.findall('.*uname: "(.*?)"',
-                           str(soup.select('body > script')))[0]
+                           data.text)[0]
     except:
         bname = 'null'
 
@@ -55,8 +54,9 @@ def get_user_bname(bduss):
     return result
 
 
-def get_user_tieba(bduss, bname):
+def get_tiebas(bduss, bname, size=200):
     s = requests.Session()
+
     result = []
     page_count = 1
     has_more = '1'
@@ -71,9 +71,9 @@ def get_user_tieba(bduss, bname):
             'is_guest': 1,
             'model': 'H60-L01',
             'page_no': page_count,
-            'page_size': 200,
+            'page_size': size,
             'timestamp': str(int(time.time())) + '903',
-            'uid': getuserid(bname),
+            'uid': _get_userid(bname),
         }
 
         datas['sign'] = gen_hash(datas)
@@ -91,14 +91,15 @@ def get_user_tieba(bduss, bname):
 
         page_count = page_count + 1
         has_more = detail.json()['has_more']
-        
+
         if has_more == '0':
             break
-    
+
+    # print (result)
     return result
 
 
-def getuserid(bname):
+def _get_userid(bname):
     res = requests.get(
         'http://tieba.baidu.com/home/get/panel?ie=utf-8&un={}'.format(bname))
     return res.json()['data']['id']
@@ -112,19 +113,6 @@ def get_tbs(bduss):
                               .format(random.randint(1, 255))},
                      cookies={'BDUSS': bduss})
     return s.json()['tbs']
-
-
-def gen_hash(datas):
-    hashstr = ''
-    keys = 'tiebaclient!!!'
-    datakeys = datas.keys()
-
-    for i in datakeys:
-        hashstr += str(i) + '=' + str(datas[i])
-
-    sign = hashlib.md5(hashstr.encode('utf-8') +
-                       keys.encode('utf-8')).hexdigest().upper()
-    return sign
 
 
 def do_sign(tbs, bduss, fid, tiename):
@@ -154,8 +142,26 @@ def do_sign(tbs, bduss, fid, tiename):
     # error_code *            => Faild
 
     datas['sign'] = gen_hash(datas)
- 
+
     res = requests.post('http://c.tieba.baidu.com/c/c/forum/sign',
                         headers=headers, cookies=cookies, data=datas)
 
     return (res.json())
+
+
+def gen_hash(datas):
+    hashstr = ''
+    keys = 'tiebaclient!!!'
+    datakeys = datas.keys()
+
+    for i in datakeys:
+        hashstr += str(i) + '=' + str(datas[i])
+
+    sign = hashlib.md5(hashstr.encode('utf-8') +
+                       keys.encode('utf-8')).hexdigest().upper()
+    return sign
+
+
+############### Class / Refactor
+
+# pass

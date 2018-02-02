@@ -7,6 +7,4 @@ urlpatterns = [
     url(r'edit/',views.update_user_bduss,name='edit'),
     url(r'refbd/',views.add_user_tieba,name='refbd'),
     url(r'logout',views.logout_view,name='logout'),
-    url(r'detail/(?P<pk>[a-zA-Z0-9]+)/$',views.test),
-    url(r'detail/$',views.test)
 ]

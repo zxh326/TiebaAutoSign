@@ -4,7 +4,7 @@ from django.db.models.signals import post_save
 from datetime import datetime,timedelta
 # Create your models here.
 class UserProfile(models.Model):
-    user        = models.OneToOneField(User)
+    user        = models.OneToOneField(User,on_delete=models.CASCADE)
     bduss       = models.CharField(max_length=255,blank=True,null=True,default='null')
     bname       = models.CharField(max_length=255,blank=True,null=True,default='null')
     level       = models.IntegerField(blank=True,default=1)
