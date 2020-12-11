@@ -2,5 +2,5 @@ bs4==0.0.1
 Django==2.2.11
 django-crontab==0.7.1
 lxml==4.4.1
-mysqlclient==1.4.5
+mysqlclient==2.0.2
 requests==2.22.0
